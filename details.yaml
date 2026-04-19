@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: details-v1
+  namespace: cdps-3
+  labels:
+    app: details
+    version: v1
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: details
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: details
+        version: v1
+    spec:
+      containers:
+      - name: details
+        image: cdps-details:g3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 7070
+        env:
+        - name: ENABLE_EXTERNAL_BOOK_SERVICE
+          value: "true"

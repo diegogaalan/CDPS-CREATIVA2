@@ -1,0 +1,76 @@
+version: '3.9'
+
+services:
+#cada uno que ponemos en servicios es un microservicio/contenedor
+  product-page:
+    build:
+      context: .
+      dockerfile: dockerfile_productpage
+    image: cdps-productpage:g3
+    container_name: productpage_cdps_3
+    ports:
+      - "9080:9080"
+    #El fichero docker-compose debe incluir la definicion de la red con el nombre cdps-net y 
+    #luego se debe asignar la red a cada servicio que se vaya adesplegar.
+    networks:
+      - cdps-net
+    environment:
+      - TEAM_ID=3
+    volumes:
+      # Montamos el directorio del código fuente Python local
+      # Esto permite editar productpage.py en local y ver cambios tras reiniciar
+      - ./practica_creativa2/bookinfo/src/productpage:/practica_creativa2/bookinfo/src/productpage
+
+  details:
+    build:
+      context: .
+      dockerfile: dockerfile_details
+    image: cdps-details:g3
+    container_name: details_cdps_3
+    ports:
+      - "7070:7070"
+    networks:
+      - cdps-net
+    environment:
+      - ENABLE_EXTERNAL_BOOK_SERVICE=true
+    volumes:
+      # Montamos el fichero details.rb local
+      - ./practica_creativa2/bookinfo/src/details/details.rb:/opt/microservices/details.rb
+
+  reviews:
+    # No usamos volumen de código aquí porque es Java compilado (.war)
+    image: cdps-reviews:g3
+    container_name: reviews_cdps_3
+    ports:
+      - "9081:9080"
+    networks:
+      - cdps-net
+    environment:
+      - SERVICE_VERSION=${SERVICE_VERSION:-v1}
+      - ENABLE_RATINGS=${ENABLE_RATINGS:-true}
+      - STAR_COLOR=${STAR_COLOR:-black}
+
+  ratings:
+    build:
+      context: .
+      dockerfile: dockerfile_ratings
+    image: cdps-ratings:g3
+    container_name: ratings_cdps_3
+    ports:
+      - "9082:9080"
+    networks:
+      - cdps-net
+    environment:
+      - APP_VERSION=v1
+    volumes:
+      # Montamos el fichero ratings.js local
+      - ./practica_creativa2/bookinfo/src/ratings/ratings.js:/opt/microservices/ratings.js
+
+networks:
+  cdps-net:
+    name: cdps-net
+
+# Construir Todo y Levantar los Servicios: docker-compose up --build
+# Verificar los Servicios:
+# Product Page: http://:9080
+# Detener los Servicios: docker-compose down

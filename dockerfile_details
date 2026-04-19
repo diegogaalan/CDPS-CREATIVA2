@@ -1,0 +1,13 @@
+FROM ruby:2.7.1-slim
+
+WORKDIR /opt/microservices
+COPY practica_creativa2/bookinfo/src/details/details.rb .
+
+
+ENV ENABLE_EXTERNAL_BOOK_SERVICE=true
+ENV SERVICE_VERSION=v1
+
+
+EXPOSE 7070
+
+CMD ["ruby", "details.rb", "7070"]
